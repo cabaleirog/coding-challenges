@@ -3,7 +3,6 @@
 
 https://www.hackerrank.com/contests/projecteuler/challenges/euler201/problem
 
-
 For any set A of numbers, let sum(A) be the sum of the elements of A.
 
 Consider the set B = {1,3,6,8,10,11}. There are 20 subsets of B containing
@@ -49,7 +48,8 @@ def preprocess_data(numbers, size):
         size (int): Size of the subsets
 
     Returns:
-        list: The original numbers list or a subset of it
+        tuple: A subset of the numbers array, a list of the numbers which have
+            duplicates, and a list with groups which should be included
     """
     if size <= 2:
         return numbers, [], []
@@ -65,6 +65,7 @@ def preprocess_data(numbers, size):
     # the set of the element with the size of group size
     force_ignore = [x[0] for x in times.items() if x[1] == size]
     extra_groups = [size * (x,) for x in force_ignore]
+
     force_ignore.extend([x[0] for x in times.items() if x[1] > size])
 
     to_include = list(filter(lambda x: x[1] < size, times.items()))
@@ -72,10 +73,9 @@ def preprocess_data(numbers, size):
     for item in to_include:
         result.extend([item[0],] * item[1])
 
-    # TODO: Try to find another approach, it can be excluded until only 1 but
-    # looks like only once will not always work
     for item in force_ignore:
         result.extend([item,] * 1)
+
     return result, force_ignore, extra_groups
 
 
@@ -85,6 +85,7 @@ def get_sum(numbers, size, reduce_array=True):
     Args:
         numbers (list): The set of numbers
         size (int): Size of the subsets
+        reduce_array (bool): Should the array undergo preprocessing
 
     Returns:
         int: The sum of all unique sums
@@ -113,6 +114,7 @@ def get_values(iterables, force_ignores=[]):
         force_ignores (`list` of `int`): Each value on the list will cause all
             groups with them on it to be excluded automatically, with the
             exception of groups where all elements are in the exclude list.
+
     Returns:
         tuple: Two sets, one with the sums, the other with the duplicated ones
     """
