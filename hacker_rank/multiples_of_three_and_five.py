@@ -43,8 +43,8 @@ def get_sum(upper_bound, values):
     """Return the sum of all values divisables by a given set of values.
 
     Args:
-        upper_bound (int): Number which is above all values to sum
-        values (list of int): List of the divisors to use
+        upper_bound (int): Number which is **above** all values to sum
+        values (list of int): List of the factors to use
 
     Returns:
         int: Sum of all values
@@ -59,29 +59,49 @@ def get_sum(upper_bound, values):
         if len(last_divisible) == len(values):
             break
         i -= 1
-    return sum(set(get_divisors(values, last_divisible)))
+
+    total = 0
+    for value in multiples(values, last_divisible):
+        total += value
+    return total
 
 
-def get_divisors(divisors, last):
-    """Return the list of values divisible by the divisor.
+def multiples(factors_array, highest_multiples):
+    """Provide the list of integers which are divisible by any of the factors.
 
     Args:
-        divisor (int): Number to divide for
-        last (int): Last number of the sequence
+        factors_array (list of int): Numbers to divide by
+        highest_multiples (dict): Highest multiple to yield for each factor
 
     Yields:
-        int: Values which are divisible by divisor
+        int: Values which are divisible by factor
     """
     i = 0
-    divisors = sorted(divisors, reverse=True)
-    while divisors:
-        for divisor in divisors[:]:
-            number = last[divisor] - divisor * i
-            if number < divisor:
-                divisors.remove(divisor)
+    yielded = {x: {} for x in factors_array}  # Values which have been yielded
+    factors = sorted(factors_array, reverse=True)
+    while factors:
+        for factor in factors[:]:
+            number = highest_multiples[factor] - factor * i
+            if number < factor:
+                factors.remove(factor)
                 continue
-            yield number
+            # Check if we have already yielded a number
+            found = False
+            for j in factors_array:
+                if j != factor and number in yielded[j]:
+                    found = True
+                    break
+            if not found:
+                yield number
+                yielded[factor][number] = number
         i += 1
+        # Clean already yielded
+        if i % 100 == 0:
+            cut_off = highest_multiples[min(factors)] - min(factors) * i
+            # yielded will be cleaned completely for the smallest factor
+            yielded[min(factors)] = {}
+            for n in [x for x in yielded.keys() if x != min(factors)]:
+                yielded[n] = {k: v for k, v in yielded[n].items() if v < cut_off}
 
 
 if __name__ == '__main__':
