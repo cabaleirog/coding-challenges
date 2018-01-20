@@ -1,7 +1,7 @@
 """Tests for problem Multiples of 3 and 5."""
 import unittest
 
-from hacker_rank.multiples_of_three_and_five import (
+from hacker_rank.euler_multiples_of_three_and_five import (
     multiples,
     get_summation,
     get_sum

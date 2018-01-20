@@ -1,7 +1,7 @@
 """Tests for Project Euler #3: Largest prime factor."""
 import unittest
 
-from hacker_rank.largest_prime_factor import factorize
+from hacker_rank.euler_largest_prime_factor import factorize
 
 
 class TestLargestPrimeFactor(unittest.TestCase):
