@@ -1,7 +1,7 @@
 """Tests for Project Euler #5: Smallest multiple."""
 import unittest
 
-from hacker_rank.smallest_multiple import (
+from hacker_rank.euler_smallest_multiple import (
     factorize,
     get_prime_numbers,
     is_prime,

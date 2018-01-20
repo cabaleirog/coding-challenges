@@ -1,7 +1,7 @@
 """Tests for Project Euler #201: Subsets with a unique sum."""
 import unittest
 
-from hacker_rank.subsets_with_a_unique_sum import get_sum
+from hacker_rank.euler_subsets_with_a_unique_sum import get_sum
 
 
 class TestUniqueSum(unittest.TestCase):
