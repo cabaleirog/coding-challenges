@@ -1,4 +1,4 @@
-from hacker_rank.booking import climbing_leaderboard, map_ranks
+from hacker_rank.climbing_the_leaderboard import climbing_leaderboard, map_ranks
 
 
 def test_rank():
