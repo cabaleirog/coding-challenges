@@ -1,46 +1,58 @@
 """Climbing the Leaderboard.
 
-https://www.hackerrank.com/challenges/climbing-the-leaderboard/problem
+Alice is playing an arcade game and wants to climb to the top of the
+leaderboard. Can you help her track her ranking as she beats each level? The
+game uses Dense Ranking, so its leaderboard works like this:
+
+    The player with the highest score is ranked number 1 on the leaderboard.
+
+    Players who have equal scores receive the same ranking number, and the next
+    player(s) receive the immediately following ranking number.
+
+For example, four players have the scores 100, 90, 90, and 80. Those players
+will have ranks 1, 2, 2, and 3, respectively.
+
+When Alice starts playing, there are already `n` people on the leaderboard. The
+score of each player `i` is denoted by `s_i`. Alice plays for `m` levels, and
+we denote her total score after passing each level `j` as `alice_j`. After
+completing each level, Alice wants to know her current rank.
+
+You are given an array, `scores`, of monotonically decreasing leaderboard
+scores, and another array, `alice`, of Alice's cumulative scores for each level
+of the game. You must print `m` integers. The `j_th` integer should indicate
+the current rank of alice after passing the `j_th` level.
+
+For further details see the challenge's page:
+
+    https://www.hackerrank.com/challenges/climbing-the-leaderboard/problem
 
 """
+from bisect import bisect_right
 
 def climbing_leaderboard(scores, alice):
-    alice_rank = []
-    for score in alice:
-        mapping = map_ranks(scores + [score,])
-        alice_rank.append(mapping[score])
-    return alice_rank
+    """Yield Alice's ranking after playing each level on the game.
 
-def map_ranks(scores):
-    """Return mapping of points to rank"""
-    mapping = {}
-    i = 1
-    for score in sorted(set(scores), reverse=True):
-        mapping[score] = i
-        i += 1
-    return mapping
+    Args:
+        scores (`list` of `int`): Score of other players on the leaderboard
+        alice (`list` of `int`): Score of Alice after passing each level
+
+    Yields:
+        int: Rank of Alice after playing each level
+
+    Example:
+        >>> list(climbing_leaderboard([20, 10, 10, 5], [5, 10, 15]))
+        [3, 2, 2]
+
+    """
+    scores = sorted(set(scores))
+    idx = 0
+    for alice_score in alice:
+        idx = bisect_right(scores, alice_score, idx)
+        yield len(scores) - idx + 1
 
 
-if __name__ == '__main__':
-    # print(climbing_leaderboard([100, 100, 50, 40, 40, 20, 10], [5, 25, 50, 120]))
-    import time
-    from random import randint
-    from itertools import accumulate
-    s = (0, 10E9)  # Scores range
-    a = (0, 10E9)  # Alice score range
-    # n = (1, 200)  # People range
-    # m = (1, 200)  # Levels range
-    n = (1, 2E5)  # People range
-    m = (1, 2E5)  # Levels range
-    max_points_per_level = max(1, n[1] // s[1])
-    print(m[1] * max_points_per_level)
-    # largest_case
-    scores = sorted([randint(1, max_points_per_level) for x in range(int(n[1]))], reverse=True)
-    alice = list(accumulate([randint(1, 5) for x in range(int(m[1]))]))
-    print(scores)
-    print(alice)
-    start = time.perf_counter()
-    #rank = climbing_leaderboard([100, 100, 50, 40, 40, 20, 10], [5, 25, 50, 120])
-    rank = climbing_leaderboard(scores, alice)
-    print(rank)
-    print(time.perf_counter() - start)
+if __name__ == "__main__":
+    scores = [100, 100, 50, 40, 40, 20, 10]
+    alice = [5, 25, 50, 120]
+    for current_rank in climbing_leaderboard(scores, alice):
+        print(current_rank)
