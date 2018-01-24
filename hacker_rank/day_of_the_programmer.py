@@ -26,7 +26,6 @@ yyyy is `y`.
 https://www.hackerrank.com/challenges/day-of-the-programmer/problem
 
 """
-
 from enum import Enum
 
 DAY_OF_THE_PROGRAMMER = 256
@@ -46,7 +45,7 @@ def day_of_the_programmer(year):
     for idx, days in enumerate(days_by_month):
         count += days
         diff = DAY_OF_THE_PROGRAMMER - count
-        if diff <= days_by_month[idx + 1]:  # TODO: Check if should be < or <=
+        if diff <= days_by_month[idx + 1]:
             month = (idx + 1) + 1  # Next month index + 1 to convert it to 1-12
             day = diff
             break
@@ -57,9 +56,9 @@ def get_days_array(leap_year, calendar):
     months_with_31_days = [1, 3, 5, 7, 8, 10, 12]
     months_with_30_days = [4, 6, 9, 11]
     days = [0] * 12
-    days[1] = 29 if leap_year else 28  # Index 0 is January
+    days[1] = 29 if leap_year else 28  # Index 0 is Jan., Index 1 is Feb.
     if calendar == Calendar.TRANSITION:
-        days[1] -= 13  # Feb. 1 to 13 were skipped.
+        days[1] -= 13  # Feb. 1 to 13 were skipped on that year.
     for i in months_with_31_days:
         days[i - 1] = 31
     for i in months_with_30_days:
@@ -85,4 +84,4 @@ def is_leap_year(year, calendar=Calendar.JULIAN):
 
 
 if __name__ == '__main__':
-    print(day_of_the_programmer(2017))
+    print(day_of_the_programmer(2018))
