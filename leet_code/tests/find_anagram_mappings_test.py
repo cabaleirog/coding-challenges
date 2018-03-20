@@ -5,7 +5,7 @@ from leet_code.find_anagram_mappings import get_mapping
 
 
 class TestAnagramMapping(unittest.TestCase):
-    """TestCase for the Anagram mapping method"""
+    """TestCase for the `get_mapping` function"""
 
     def test_problem_example(self):
         arrays = [12, 28, 46, 32, 50], [50, 12, 32, 46, 28]
