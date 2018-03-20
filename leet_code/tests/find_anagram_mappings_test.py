@@ -18,6 +18,11 @@ class TestAnagramMapping(unittest.TestCase):
         self.assertEqual(get_mapping([32, 24], [32, 24]), [0, 1])
         self.assertEqual(get_mapping([32, 24], [24, 32]), [1, 0])
 
+    def test_with_duplicated_elements(self):
+        # Note: Multiple valid solutions can be created here. ie. [2,3,4,5,1,0]
+        arrays = [1, 1, 1, 1, 5, 6], [6, 5, 1, 1, 1, 1]
+        self.assertEqual(get_mapping(*arrays), [5, 4, 3, 2, 1, 0])
+
 
 if __name__ == '__main__':
     unittest.main()
