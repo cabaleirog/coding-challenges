@@ -54,7 +54,7 @@ def get_mapping(a, b):
         - The list is sorted by the number value (Required by groupby method)
         - Create a dictionary mapping each number value to the tuple.
         - For each value of `a`, pop the first value in mapping, from the list
-        of tuples; thus, the following duplicated number will pop the following
+        of tuples; thus, the following duplicated number will pop the next
         available `index`.
     """
     indices = sorted(enumerate(b), key=lambda x: x[1])

@@ -2,6 +2,8 @@
 
 https://www.hackerrank.com/contests/pythonist3/challenges/validating-postalcode
 
+Difficulty: HARD
+Max Score: 100
 
 A postal code `P` must be a number in the range of (100000, 999999).
 
@@ -25,7 +27,7 @@ Note:
 """
 
 
-def alternating_repetitive_digits(code):
+def alt_rep_digits(code):
     """Count the number of times the code has alternating repetitive digits.
 
     Args:
@@ -35,12 +37,10 @@ def alternating_repetitive_digits(code):
         int: total number of alternating repetitive digits
     """
     count = 0
-    enum_codes = list(enumerate([x for x in code]))
-    evens = list(filter(lambda x: x[0] % 2 == 0, enum_codes))
-    odds = list(filter(lambda x: x[0] % 2 != 0, enum_codes))
-    for group in [evens, odds]:
+    for group in (code[::2], code[1::2]):
+        # Offset by one to create a list like [(x0, x2), (x2, x4), ...]
         group_zip = zip(group[:-1], group[1:])
-        count += len(list(filter(lambda x: x[1][1] == x[0][1], group_zip)))
+        count += len(list(filter(lambda x: x[0] == x[1], group_zip)))
     return count
 
 
@@ -48,18 +48,14 @@ def validate(postal_code):
     """Validate the Postal Code according to the provided rules.
 
     Args:
-        postal_code: the code to verify
+        postal_code (int|str): the code to validate
 
     Returns:
         bool: True if the postal code is valid
     """
     code = str(postal_code)
-    try:
-        int(code)  # Verify that the provided code is numeric only
-    except ValueError:
-        return False
-    is_valid_range = int(code) >= 100000 and int(code) <= 999999
-    return is_valid_range and alternating_repetitive_digits(code) <= 1
+    count = alt_rep_digits(code)
+    return code.isnumeric() and 100000 <= int(code) <= 999999 and count <= 1
 
 
 if __name__ == '__main__':
