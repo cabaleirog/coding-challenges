@@ -29,12 +29,13 @@ For further details see the challenge's page:
 """
 from bisect import bisect_right
 
+
 def climbing_leaderboard(scores, alice):
-    """Yield Alice's ranking after playing each level on the game.
+    """Calculate Alice's ranking after playing each level on the game.
 
     Args:
-        scores (`list` of `int`): Score of other players on the leaderboard
-        alice (`list` of `int`): Score of Alice after passing each level
+        scores (List[int]): The score of other players on the leaderboard
+        alice (List[int]): The score of Alice after passing each level
 
     Yields:
         int: Rank of Alice after playing each level
@@ -42,7 +43,6 @@ def climbing_leaderboard(scores, alice):
     Example:
         >>> list(climbing_leaderboard([20, 10, 10, 5], [5, 10, 15]))
         [3, 2, 2]
-
     """
     scores = sorted(set(scores))
     idx = 0
@@ -51,7 +51,7 @@ def climbing_leaderboard(scores, alice):
         yield len(scores) - idx + 1
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     scores = [100, 100, 50, 40, 40, 20, 10]
     alice = [5, 25, 50, 120]
     for current_rank in climbing_leaderboard(scores, alice):

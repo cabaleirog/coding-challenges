@@ -4,49 +4,48 @@ https://www.hackerrank.com/contests/projecteuler/challenges/euler003
 
 The prime factors of 13195 are 5, 7, 13 and 29. What is the largest prime
 factor of the number N?
-
-Input Format:
-
-    First line contains T, the number of test cases. This is followed by T
-    lines each containing an integer N.
-
-Constraints:
-
-    1 <= T <= 10
-    10 <= N <= 10^12
-
-Output Format:
-
-    For each test case, display the largest prime factor of N.
 """
+
+
 def factorize(number):
     """Return the prime factors for a given number.
 
     Args:
-        number (int): Target number to factorize
+        number (int): Target number to factorize.
 
     Returns:
-        list: List of the factors
+        List[int]: List of sorted prime factors.
+
+    Examples:
+        >>> factorize(20)
+        [2, 5]
+        >>> factorize(2 * 2 * 2 * 3 * 3 * 5 * 7)
+        [2, 3, 5, 7]
     """
     factors = set()
-    aux = number
-    while True:
-        if aux == 1:
-            break
-        if aux % 2 == 0:
-            factors.add(2)
-            aux = aux // 2
-            continue
-        for i in range(3, aux + 1, 2):
-            if (aux / i) == (aux // i):
+
+    # Divide `number` until it becomes odd.
+    if number > 1 and number % 2 == 0:
+        factors.add(2)
+        while number % 2 == 0:
+            number //= 2
+
+    # Only check for odd factors now.
+    while number > 1:
+        for i in range(3, int(number ** 0.5) + 1, 2):
+            if number % i == 0:
                 factors.add(i)
-                aux = aux // i
+                number //= i
                 break
+        else:  # no-break (Prime number).
+            factors.add(number)
+            break  # We are done; the current value is a prime number.
+
     return sorted(factors)
 
 
 if __name__ == '__main__':
-    target = 3 * 7 * 19 * 137 * 149
-    result = factorize(target)
-    print('Factors of {} are {}; the largest prime factor been {}'.format(
-        target, result, result[-1]))
+    target = int(input('Number:').strip())
+    factors = factorize(target)
+    msg = 'Prime factors of {0} are {1}; the largest been {2}.'
+    print(msg.format(target, factors, factors[-1]))

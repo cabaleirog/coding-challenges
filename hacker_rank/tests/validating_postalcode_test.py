@@ -1,20 +1,17 @@
-from hacker_rank.validating_postalcode import (
-    alternating_repetitive_digits,
-    validate
-)
+from hacker_rank.validating_postalcode import alt_rep_digits, validate
 
 
 def test_without_alternating_repetitive_digits():
-    assert alternating_repetitive_digits('125125') == 0
-    assert alternating_repetitive_digits('234225') == 0
-    assert alternating_repetitive_digits('012345') == 0
+    assert alt_rep_digits('125125') == 0
+    assert alt_rep_digits('234225') == 0
+    assert alt_rep_digits('012345') == 0
 
 
 def test_with_alternating_repetitive_digits():
-    assert alternating_repetitive_digits('100000') == 3
-    assert alternating_repetitive_digits('111111') == 4
-    assert alternating_repetitive_digits('112222') == 2
-    assert alternating_repetitive_digits('121756') == 1
+    assert alt_rep_digits('100000') == 3
+    assert alt_rep_digits('111111') == 4
+    assert alt_rep_digits('112222') == 2
+    assert alt_rep_digits('121756') == 1
 
 
 def test_numeric_only_postal_codes():
