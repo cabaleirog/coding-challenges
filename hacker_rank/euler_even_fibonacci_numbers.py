@@ -16,13 +16,31 @@ Examples:
 """
 
 
-def fibonacci_even_numbers(upper_bound):
-    total, a, b = 0, 1, 2
-    while a < upper_bound:
-        if a % 2 == 0:
-            total += a
+def fibonacci():
+    """A simple generator for the Fibonacci sequence.
+
+    Yields:
+        int: The next term in the fibonacci sequence starting at 1.
+    """
+    a, b = 1, 2
+    while True:
+        yield a
         a, b = b, a + b
-    return total
+
+
+def fibonacci_even_numbers(n):
+    """Sum all even Fibonacci numbers whose values do not exceed `n`.
+
+    Returns:
+        int: Total sum of even terms.
+    """
+    gen = fibonacci()
+    total = 0
+    while True:
+        term = next(gen)
+        if term >= n:
+            return total
+        total += term * (term % 2 == 0)
 
 
 if __name__ == '__main__':
