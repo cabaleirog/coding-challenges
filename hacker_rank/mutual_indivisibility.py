@@ -27,18 +27,16 @@ def indivisible_team(a, b, size):
     team = set()
     count = 0
     for i in range(b, a - 1, -1):
-        for j in range(i, b + 1, i):
-            if j in team:
-                break
-        else:  # no break
-            team.add(i)
-            count += 1
+        if any(j in team for j in range(i, b + 1, i)):
+            continue
+        team.add(i)
+        count += 1
         if count == size:
             return list(team)
 
 
 if __name__ == '__main__':
-    # The first line contains a single integer t, the number of test cases.
+    # The first line contains a single integer, the number of test cases.
     # Each test case consists of a single line containing three space-separated
     # integers a, b and x.
     for _ in range(int(input().strip())):
