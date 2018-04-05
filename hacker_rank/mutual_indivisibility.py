@@ -2,6 +2,8 @@
 
 https://www.hackerrank.com/contests/hourrank-24/challenges/mutual-indivisibility
 
+- Difficulty: Medium
+
 Jugnu has recently been appointed as the sports captain. The headmaster asked
 her to form a team for an upcoming table tennis tournament, subject to a few
 constraints.
