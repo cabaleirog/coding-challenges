@@ -20,9 +20,9 @@ def fibonacci():
     """A simple generator for the Fibonacci sequence.
 
     Yields:
-        int: The next term in the fibonacci sequence starting at 1.
+        int: The next term in the fibonacci sequence starting at 0.
     """
-    a, b = 1, 2
+    a, b = 0, 1
     while True:
         yield a
         a, b = b, a + b
@@ -34,10 +34,8 @@ def fibonacci_even_numbers(n):
     Returns:
         int: Total sum of even terms.
     """
-    gen = fibonacci()
     total = 0
-    while True:
-        term = next(gen)
+    for term in fibonacci():
         if term >= n:
             return total
         total += term * (term % 2 == 0)
