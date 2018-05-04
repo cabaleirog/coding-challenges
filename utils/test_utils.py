@@ -35,7 +35,7 @@ def assert_time_limit_multitest(time_limit, func, *args, **kwargs):
     """
     if len(args) <= 1:
         raise ValueError(
-            'Multitest expects an iterable of size greater than two')
+            'Multitest expects an iterable of size greater than one')
     start = time.perf_counter()
     for test_args in args:
         _ = func(test_args)
