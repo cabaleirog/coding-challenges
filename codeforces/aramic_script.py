@@ -1,4 +1,4 @@
-"""Aramic script.
+"""Codeforces Round #478 (Div. 2): Aramic script.
 
 http://codeforces.com/contest/975/problem/A
 

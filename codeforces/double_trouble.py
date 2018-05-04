@@ -1,5 +1,7 @@
 """Double Trouble.
 
+Yandex.Algorithm 2018, third qualification round. April 8th, 2018.
+
 http://codeforces.com/gym/101773/problem/B
 
 
