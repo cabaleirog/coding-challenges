@@ -2,8 +2,7 @@
 
 https://www.hackerrank.com/contests/pythonist3/challenges/validating-postalcode
 
-Difficulty: HARD
-Max Score: 100
+- Difficulty: Hard
 
 A postal code `P` must be a number in the range of (100000, 999999).
 
@@ -31,14 +30,15 @@ def alt_rep_digits(code):
     """Count the number of times the code has alternating repetitive digits.
 
     Args:
-        code (str): the code to verify
+        code (str): The code to verify.
 
     Returns:
-        int: total number of alternating repetitive digits
+        int: Total number of alternating repetitive digits.
     """
     count = 0
+    # Loop first by values with even indices, then the ones with odd indices.
     for group in (code[::2], code[1::2]):
-        # Offset by one to create a list like [(x0, x2), (x2, x4), ...]
+        # Offset by one to create a list of pairs [(x0, x2), (x2, x4), ...]
         group_zip = zip(group[:-1], group[1:])
         count += len(list(filter(lambda x: x[0] == x[1], group_zip)))
     return count
@@ -48,10 +48,10 @@ def validate(postal_code):
     """Validate the Postal Code according to the provided rules.
 
     Args:
-        postal_code (int|str): the code to validate
+        postal_code (int|str): The code to validate.
 
     Returns:
-        bool: True if the postal code is valid
+        bool: True if the postal code is valid.
     """
     code = str(postal_code)
     count = alt_rep_digits(code)
