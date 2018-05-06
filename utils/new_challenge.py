@@ -4,6 +4,7 @@ import argparse
 import logging
 import time
 
+import bs4
 from getpass import getpass
 from selenium import webdriver
 from selenium import webdriver
@@ -11,7 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from challenge_template import TEMPLATE_CHALLENGE_FILE, TEMPLATE_TEST_FILE
+from utils.challenge_template import TEMPLATE_CHALLENGE_FILE, TEMPLATE_TEST_FILE
 
 
 ch = logging.StreamHandler()
@@ -22,7 +23,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 
-class RenameMe:
+class Parser:
     def __init__(self, folder=None):
         self.folder = folder
         self.url = None
@@ -40,12 +41,100 @@ class RenameMe:
         self.challenge_test_path = None
 
     def set_file_blablabla(self):
-        self.filename = self.name.replace(' ', '_').replace('-', '_').lower()
-        self.challenge_file_path = f'{self.folder}/{self.filename}.py'
-        self.challenge_test_path = f'{self.folder}/tests/{self.filename}_test.py'
-
         # FIXME: This doesnt go here. :p
         self.description = self.pep8_lines(self.description)
+
+    def create_coding_file(self):
+        path = f'{self.folder}/{self.filename}.py'
+
+        if os.path.isfile(path):
+            logger.error('File %s already exists. Aborting.', path)
+            return False
+
+        with open(path, 'w', encoding='utf8') as f:
+            f.write(f'"""{self.name}.\n\n')
+
+            if self.difficulty:
+                f.write(f'- Difficulty: {self.difficulty}\n\n')
+
+            f.write(f'{self.url}\n\n')
+
+            descr = self.pep8_lines(self.description)
+            f.write(f'{descr}\n\n')
+
+            f.write('"""\n')
+
+            logging_conf = """
+                import logging
+
+                ch = logging.StreamHandler()
+                ch.setLevel(logging.DEBUG)
+
+                logger = logging.getLogger()
+                logger.setLevel(logging.DEBUG)
+                logger.addHandler(ch)
+            """
+            self.text_block_to_file(logging_conf, f)
+            f.write('\n\n')
+
+            main_code = """
+                def solve(*args):
+                    return '...'
+
+
+                def main():
+                    for _ in range(int(input().strip())):
+                        args = input().strip().split()
+                        result = solve(*args)
+                        print(result)
+
+
+                if __name__ == '__main__':
+                    main()
+            """
+            self.text_block_to_file(main_code, f)
+
+            logger.info(f'File {path} created.')
+
+    def create_testing_file(self):
+        path = f'{self.folder}/tests/{self.filename}_test.py'
+
+        if os.path.isfile(path):
+            logger.error('File %s already exists. Aborting.', path)
+            return False
+
+        with open(path, 'w', encoding='utf8') as f:
+            f.write('from utils.test_utils import assert_time_limit\n')
+            f.write(f'from {self.folder}.{self.filename} import solve\n\n\n')
+
+            test_statement = """
+                def test_problem_statement_sample_test_cases():
+                    args = ['Arg0', 'Arg1', 'ArgN']
+                    expected = 'Expected Value'
+                    assert solve(*args) == expected
+            """
+            self.text_block_to_file(test_statement, f)
+            f.write('\n\n')
+
+            test_statement = """
+                def test_time_limit():
+                    args = []
+                    assert_time_limit(0, solve, args)  # time limit (s): XXX
+            """
+            self.text_block_to_file(test_statement, f)
+
+            logger.info(f'File {path} created.')
+
+    @staticmethod
+    def text_block_to_file(text_block, file_obj):
+        lines = text_block.split('\n')
+        if not lines[0].strip():
+            lines = lines[1:]
+        left_margin = len(lines[0]) - len(lines[0].lstrip())
+        for i, line in enumerate(lines):
+            file_obj.write(line[left_margin:].rstrip())
+            if i < len(lines) - 1:
+                file_obj.write('\n')
 
     @staticmethod
     def pep8_lines(text):
@@ -71,27 +160,17 @@ class Base:
         self.username = username
         self.password = password
         self.driver = driver
-        self.details = RenameMe(self.folder)
+        self.details = Parser(self.folder)
 
     def create_files(self, details):
+        #self.details.filename = self.details.name.replace(' ', '_').replace('-', '_').lower()
+        # self.challenge_file_path = f'{self.folder}/{self.filename}.py'
+        # self.challenge_test_path = f'{self.folder}/tests/{self.filename}_test.py'
+
         # Challenge problem file
         self.details.set_file_blablabla()
-        path = self.details.challenge_file_path
-        if os.path.isfile(path):
-            logger.error('File %s already exists. Aborting.', path)
-        else:
-            with open(path, 'w', encoding='utf8') as f:
-                f.write(TEMPLATE_CHALLENGE_FILE.format(**details.__dict__))
-                logger.info('File %s created.', path)
-
-        # Challenge test file
-        path = self.details.challenge_test_path
-        if os.path.isfile(path):
-            logger.error('File %s already exists. Aborting.', path)
-        else:
-            with open(path, 'w', encoding='utf8') as f:
-                f.write(TEMPLATE_TEST_FILE.format(**details.__dict__))
-                logger.info('File %s created.', path)
+        self.details.create_coding_file()
+        self.details.create_testing_file()
 
 
 class HackerRank(Base):
@@ -191,8 +270,13 @@ class Codeforces(Base):
 
         name = problem.find_element_by_class_name('title')
         name = name.get_attribute('textContent')
+
         if name[1] == '.' and name[2] == ' ':
-            name = name[3:]
+            filename = name[3:].replace(' ', '_').replace('-', '_').lower()
+            name = 'Problem {} - {}'.format(name[0], name[3:])
+        logger.info('Name is %s', name)
+
+        details.filename = filename
         details.name = name
 
         time_limit = problem.find_element_by_class_name('time-limit')
@@ -258,95 +342,8 @@ class Codeforces(Base):
                 print(tag)
             return details
 
-    # def get_problem(self, url):
-    #     driver = self.driver
-
-    #     # Gathering challenge information
-    #     driver.get(url)
-
-    #     details = {'url': url}
-
-    #     element = WebDriverWait(driver, 10).until(
-    #         EC.presence_of_element_located((By.CLASS_NAME, "title")))
-
-    #     # WebDriver Element
-    #     problem = driver.find_element_by_class_name('problem-statement')
-
-    #     name = problem.find_element_by_class_name('title')
-    #     details['name'] = name.text
-
-    #     time_limit = problem.find_element_by_class_name('time-limit')
-    #     details['time_limit'] = time_limit.text
-
-    #     xpath = '//div[@class="header"]/following-sibling::div//p'
-    #     description = problem.find_elements_by_xpath(xpath)
-    #     description = '\n\n'.join([x.text for x in description])
-    #     details['description'] = description
-    #     print(description)
-
-    #     # Input format
-    #     xpath = '//div[@class="input-specification"]//p'
-    #     ps_input = problem.find_elements_by_xpath(xpath)
-    #     ps_input = '\n'.join([x.text.strip() for x in ps_input])
-    #     details['input_format'] = ps_input
-    #     print(ps_input)
-
-    #     # Output format
-    #     xpath = '//div[@class="output-specification"]//p'
-    #     ps_output = problem.find_elements_by_xpath(xpath)
-    #     ps_output = '\n'.join([x.text.strip() for x in ps_output])
-    #     details['output_format'] = ps_output
-    #     print(ps_output)
-
-    #     # Notes
-    #     xpath = '//div[@class="note"]//p'
-    #     ps_note = problem.find_elements_by_xpath(xpath)
-    #     ps_note = '\n'.join([x.text.strip() for x in ps_note])
-    #     details['notes'] = ps_note
-    #     print(ps_note)
-
-    #     # Sample test cases
-    #     xpath = '//div[@class="sample-tests"]/div[@class="sample-test"]/div//pre'
-    #     details['sample_tests'] = []
-    #     for i, t in enumerate(problem.find_elements_by_xpath(xpath)):
-    #         if i % 2 == 0:
-    #             test_input = t.get_attribute('innerHTML').split('<br>')
-    #             test_input = '\n'.join([x.strip() for x in test_input if x])
-    #         else:
-    #             test_output = t.get_attribute('innerHTML').split('<br>')
-    #             test_output = '\n'.join([x.strip() for x in test_output if x])
-    #             # Add the input and output to the list.
-    #             details['sample_tests'].append([test_input, test_output])
-
-    #     print('Sample test cases:')
-    #     for t in details['sample_tests']:
-    #         print('>>> Input')
-    #         print(t[0])
-    #         print('>>> Output')
-    #         print(t[1])
-    #         print('-----')
-
-    #     # Tags
-    #     print('Tags:')
-    #     xpath = '//div[@id="sidebar"]//div[contains(text(), "tags")]/following-sibling::div//div[contains(@class, "roundbox")]//span'
-    #     try:
-    #         tags = problem.find_elements_by_xpath(xpath)
-    #     except Exception:
-    #         details['tags'] = []
-    #         logger.debug('Tags not found.')
-    #     else:
-    #         details['tags'] = [x.text.strip() for x in tags if x]
-    #         for tag in details['tags']:
-    #             print(tag.text)
-    #         return details
-
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-v', '--verbosity')
-    # parser.add_argument('-f', '--folder')
-
-    # choices = ('CodeChef', 'Codeforces', 'HackerRank', 'Topcoder')
     choices = (
         ('Codeforces', Codeforces),
         ('HackerRank', HackerRank))
@@ -356,7 +353,8 @@ def main():
         print(f'{i}: {name}')
 
     try:
-        choice, choice_cls = choices[int(input().strip())]
+        #choice, choice_cls = choices[int(input().strip())]
+        choice, choice_cls = choices[0]
     except Exception as e:
         logger.error('Wrong input. %s.', e)
         raise
