@@ -13,8 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from challenge_template import TEMPLATE_CHALLENGE_FILE, TEMPLATE_TEST_FILE
-
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -312,12 +310,12 @@ class Codeforces(Base):
             header_div.find_next_sibling('div'))
 
         # Input format
-        _, *elements = soup.find('div', attrs={'class': 'input-specification'})
-        details.input_format = self.element_to_text(elements)
+        _, *elems = soup.find('div', attrs={'class': 'input-specification'})
+        details.input_format = self.element_to_text(elems)
 
         # Output format
-        _, *elements = soup.find('div', attrs={'class': 'output-specification'})
-        details.output_format = self.element_to_text(elements)
+        _, *elems = soup.find('div', attrs={'class': 'output-specification'})
+        details.output_format = self.element_to_text(elems)
 
         # Notes
         details.notes = self.element_to_text(
@@ -337,6 +335,8 @@ class Codeforces(Base):
         # Tags
         element = soup.find_all('span', attrs={'class': 'tag-box'})
         details.tags = [x.get_text(strip=True) for x in element]
+
+        return details
 
 
 def main():
