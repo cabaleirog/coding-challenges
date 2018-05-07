@@ -30,15 +30,16 @@ class TestLargestPrimeFactor(unittest.TestCase):
             factors = factorize(n)
             self.assertEqual(factors, sorted(factors))
 
+    # Time limit: 10 seconds.
     def test_time_limit_largest_test_case_size(self):
-        # time limit: 10 seconds; 1 <= T <= 10; 10 <= N <= 10 ** 12
-        tests = [round(10 ** (12 - i * 1.22)) for i in range(10)]
+        # 1 <= T <= 10
+        # 10 <= N <= 10 ** 12
+        tests = [(int(10 ** (12 - i * 1.22)),) for i in range(10)]
         assert_time_limit_multitest(10, factorize, *tests)
 
     def test_time_limit_largest_test_case_size_with_max_number_each_case(self):
-        tests = [10 ** 12] * 10
+        tests = [(10 ** 12,)] * 10
         assert_time_limit_multitest(10, factorize, *tests)
-
 
 
 if __name__ == '__main__':
