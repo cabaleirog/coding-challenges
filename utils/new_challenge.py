@@ -3,6 +3,7 @@ import sys
 import argparse
 import logging
 import time
+from urllib.request import urlopen
 
 import bs4
 from getpass import getpass
@@ -12,7 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from utils.challenge_template import TEMPLATE_CHALLENGE_FILE, TEMPLATE_TEST_FILE
+from challenge_template import TEMPLATE_CHALLENGE_FILE, TEMPLATE_TEST_FILE
 
 
 ch = logging.StreamHandler()
@@ -137,26 +138,29 @@ class Parser:
                 file_obj.write('\n')
 
     @staticmethod
-    def pep8_lines(text):
-        line_width = 0
-        lines = []
-        line = []
-        for word in text.split():
-            line_width += 1 + len(word.strip())
-            if line_width > 79:
+    def pep8_lines(paragraphs):
+        def fix_length(s):
+            line_width = 0
+            lines = []
+            line = []
+            for word in text.split():
+                line_width += 1 + len(word.strip())
+                if line_width > 79:
+                    lines.append(line)
+                    line_width = len(word.strip())
+                    line = []
+                line.append(word.strip())
+            if line:
                 lines.append(line)
-                line_width = len(word.strip())
-                line = []
-            line.append(word.strip())
-        if line:
-            lines.append(line)
-        return '\n'.join([' '.join(x) for x in lines])
+            return '\n'.join([' '.join(x) for x in lines])
+        return '\n\n'.join(fix_length(p) for p in paragraphs)
+
 
 
 class Base:
     folder = ''
 
-    def __init__(self, username, password, driver):
+    def __init__(self, username=None, password=None, driver=None):
         self.username = username
         self.password = password
         self.driver = driver
@@ -253,23 +257,31 @@ class Codeforces(Base):
     def login(self):
         pass  # Not needed for Codeforces
 
+    @staticmethod
+    def element_to_text(elements):
+        text = ''
+        if not isinstance(elements, list):
+            elements = elements.contents
+        for i, element in enumerate(elements):
+            if element.name == 'p':
+                text += element.text.strip() + '\n'
+            elif element.name == 'ul':
+                for li in element.find_all('li'):
+                    text += f'- {li.text.strip()}\n'
+            else:
+                logger.warning('Unhandled element <%s> found.', element.name)
+            if i < len(elements) - 1:
+                text += '\n'
+        return text
+
     def get_problem(self, url):
-        driver = self.driver
-
-        # Gathering challenge information
-        driver.get(url)
-
         details = self.details
         details.url = url
 
-        element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "title")))
+        html = urlopen(url).read()
+        soup = bs4.BeautifulSoup(html, 'html.parser')
 
-        # WebDriver Element
-        problem = driver.find_element_by_class_name('problem-statement')
-
-        name = problem.find_element_by_class_name('title')
-        name = name.get_attribute('textContent')
+        name = soup.find('div', attrs={'class': 'title'}).text
 
         if name[1] == '.' and name[2] == ' ':
             filename = name[3:].replace(' ', '_').replace('-', '_').lower()
@@ -279,68 +291,40 @@ class Codeforces(Base):
         details.filename = filename
         details.name = name
 
-        time_limit = problem.find_element_by_class_name('time-limit')
-        details.time_limit = time_limit.get_attribute('textContent')
+        _, limit = soup.find('div', attrs={'class': 'time-limit'})
+        details.time_limit = limit
 
-        xpath = '//div[@class="header"]/following-sibling::div/p'
-        description = problem.find_elements_by_xpath(xpath)
-        description = '\n\n'.join([p.get_attribute('textContent').strip() for p in description])
-        details.description = description
-        print(description)
+        # Problem description.
+        header_div = soup.find('div', attrs={'class': 'header'})
+        details.description = self.element_to_text(
+            header_div.find_next_sibling('div'))
 
         # Input format
-        xpath = '//div[@class="input-specification"]//p'
-        ps_input = problem.find_elements_by_xpath(xpath)
-        ps_input = '\n'.join([p.get_attribute('textContent').strip() for p in ps_input])
-        details.input_format = ps_input
-        print(ps_input)
+        _, *elements = soup.find('div', attrs={'class': 'input-specification'})
+        details.input_format = self.element_to_text(elements)
 
         # Output format
-        xpath = '//div[@class="output-specification"]//p'
-        ps_output = problem.find_elements_by_xpath(xpath)
-        ps_output = '\n'.join([p.get_attribute('textContent').strip() for p in ps_output])
-        details.output_format = ps_output
-        print(ps_output)
+        _, *elements = soup.find('div', attrs={'class': 'output-specification'})
+        details.output_format = self.element_to_text(elements)
 
         # Notes
-        xpath = '//div[@class="note"]//p'
-        ps_note = problem.find_elements_by_xpath(xpath)
-        ps_note = '\n'.join([p.get_attribute('textContent').strip() for p in ps_note])
-        details.notes = ps_note
-        print(ps_note)
+        details.notes = self.element_to_text(
+            soup.find('div', attrs={'class': 'note'}))
 
         # Sample test cases
-        xpath = '//div[@class="sample-tests"]/div[@class="sample-test"]/div//pre'
-        for i, t in enumerate(problem.find_elements_by_xpath(xpath)):
-            if i % 2 == 0:
-                test_input = t.get_attribute('innerHTML').split('<br>')
-                test_input = '\n'.join([x.strip() for x in test_input if x])
-            else:
-                test_output = t.get_attribute('innerHTML').split('<br>')
-                test_output = '\n'.join([x.strip() for x in test_output if x])
-                # Add the input and output to the list.
-                details.sample_tests.append([test_input, test_output])
-
-        print('Sample test cases:')
-        for t in details.sample_tests:
-            print('>>> Input')
-            print(t[0])
-            print('>>> Output')
-            print(t[1])
-            print('-----')
+        tests = []
+        element = soup.find('div', attrs={'class': 'sample-test'})
+        inputs = element.find_all('div', attrs={'class': 'input'})
+        outputs = element.find_all('div', attrs={'class': 'output'})
+        for i, j in zip(inputs, outputs):
+            _in = '\n'.join([x for x in i.find('pre') if isinstance(x, str)])
+            _ou = '\n'.join([x for x in j.find('pre') if isinstance(x, str)])
+            tests.append([_in, _ou])
+        details.sample_tests = tests
 
         # Tags
-        print('Tags:')
-        xpath = '//div[@id="sidebar"]//div[contains(text(), "tags")]/following-sibling::div//div[contains(@class, "roundbox")]//span'
-        try:
-            tags = problem.find_elements_by_xpath(xpath)
-        except Exception:
-            logger.debug('Tags not found.')
-        else:
-            details.tags = [x.text.strip() for x in tags if x]
-            for tag in details.tags:
-                print(tag)
-            return details
+        element = soup.find_all('span', attrs={'class': 'tag-box'})
+        details.tags = [x.get_text(strip=True) for x in element]
 
 
 def main():
@@ -360,29 +344,34 @@ def main():
         raise
 
     # Credentials
-    print(f'Provide your credentials for {choice}:')
+    # print(f'Provide your credentials for {choice}:')
     # username = input('Username:')
     # password = getpass('Password:')
-    username = 'mydarksoul69@gmail.com'  # TODO: Debug only
-    password = 'l>^cFr8%D7Vtcyd6SM'  # TODO: Debug only
+    # username = 'mydarksoul69@gmail.com'  # TODO: Debug only
+    # password = 'l>^cFr8%D7Vtcyd6SM'  # TODO: Debug only
 
-    driver = webdriver.Firefox(executable_path=r'D:\geckodriver.exe')
+    # driver = webdriver.Firefox(executable_path=r'D:\geckodriver.exe')
 
-    obj = choice_cls(username, password, driver)
+    #obj = choice_cls(username, password, driver)
 
-    try:
-        obj.login()
-    except Exception as e:
-        logger.error('Unable to login to HackerRank. %s.', e)
-        driver.quit()
-        sys.exit(1)
+    # try:
+    #     obj.login()
+    # except Exception as e:
+    #     logger.error('Unable to login to HackerRank. %s.', e)
+    #     driver.quit()
+    #     sys.exit(1)
 
     # Keep alive so we dont need to insert credentials every time.
-    while True:
-        url = input('Challenge URL: ')
-        details = obj.get_problem(url)
-        obj.create_files(details)
-    driver.quit()
+    # while True:
+    #     url = input('Challenge URL: ')
+    #     details = obj.get_problem(url)
+    #     obj.create_files(details)
+    # driver.quit()
+
+    url = input('Challenge URL: ')
+    obj = choice_cls()
+    details = obj.get_problem(url)
+    obj.create_files(details)
 
 
 if __name__ == '__main__':
