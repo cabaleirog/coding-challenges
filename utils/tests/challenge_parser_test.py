@@ -2,7 +2,7 @@ from utils.new_challenge import Parser, HackerRank, Codeforces
 
 
 def test_codeforces_challenge_detailsA():
-    URL = 'http://codeforces.com/contest/935/problem/n'
+    URL = 'http://codeforces.com/contest/935/problem/A'
     details = Codeforces().get_problem(URL)
     assert details.url == URL
     assert 'Fafa and his Company' in details.name
