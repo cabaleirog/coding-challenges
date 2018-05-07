@@ -27,6 +27,7 @@ class Parser:
         self.folder = folder
         self.url = None
         self.name = None
+        self.time_limit = None
         self.difficulty = None
         self.description = None
         self.input_format = None
@@ -39,11 +40,6 @@ class Parser:
         self.challenge_file_path = None
         self.challenge_test_path = None
 
-    def set_file_blablabla(self):
-        # FIXME: This doesnt go here. :p
-        #self.description = self.pep8_lines(self.description)
-        pass
-
     def create_coding_file(self):
         path = f'{self.folder}/{self.filename}.py'
 
@@ -52,6 +48,7 @@ class Parser:
             return False
 
         with open(path, 'w', encoding='utf8') as f:
+            # Docstring
             f.write(f'"""{self.name}.\n\n')
 
             if self.difficulty:
@@ -59,9 +56,6 @@ class Parser:
 
             f.write(f'{self.url}\n\n')
 
-            #descr = self.pep8_lines(self.description)
-            # f.write(f'{descr}\n\n')
-            
             f.write('{}\n\n'.format(self.pep8_lines(self.description)))
 
             f.write('Input:\n\n')
@@ -72,6 +66,7 @@ class Parser:
 
             f.write('"""\n')
 
+            # Basic logging
             logging_conf = """
                 import logging
 
@@ -85,6 +80,7 @@ class Parser:
             self.text_block_to_file(logging_conf, f)
             f.write('\n\n')
 
+            # Code section
             main_code = """
                 def solve(*args):
                     return '...'
@@ -102,7 +98,7 @@ class Parser:
             """
             self.text_block_to_file(main_code, f)
 
-            logger.info(f'File {path} created.')
+        logger.info(f'Main file created successfully: {path}')
 
     def create_testing_file(self):
         path = f'{self.folder}/tests/{self.filename}_test.py'
@@ -116,7 +112,7 @@ class Parser:
             f.write(f'from {self.folder}.{self.filename} import solve\n\n\n')
 
             test_statement = """
-                def test_problem_statement_sample_test_cases():
+                def test_sample_test_case():
                     args = ['Arg0', 'Arg1', 'ArgN']
                     expected = 'Expected Value'
                     assert solve(*args) == expected
@@ -124,14 +120,16 @@ class Parser:
             self.text_block_to_file(test_statement, f)
             f.write('\n\n')
 
+            # Time limit test.
+            f.write(f'# Time limit: {self.time_limit}.\n')
             test_statement = """
                 def test_time_limit():
                     args = []
-                    assert_time_limit(0, solve, args)  # time limit (s): XXX
+                    assert_time_limit(0, solve, *args)
             """
             self.text_block_to_file(test_statement, f)
 
-            logger.info(f'File {path} created.')
+        logger.info(f'Test file created successfully: {path}')
 
     @staticmethod
     def text_block_to_file(text_block, file_obj):
@@ -163,7 +161,6 @@ class Parser:
         return '\n\n'.join(fix_length(p) for p in paragraphs)
 
 
-
 class Base:
     folder = ''
 
@@ -174,12 +171,7 @@ class Base:
         self.details = Parser(self.folder)
 
     def create_files(self, details):
-        #self.details.filename = self.details.name.replace(' ', '_').replace('-', '_').lower()
-        # self.challenge_file_path = f'{self.folder}/{self.filename}.py'
-        # self.challenge_test_path = f'{self.folder}/tests/{self.filename}_test.py'
-
         # Challenge problem file
-        self.details.set_file_blablabla()
         self.details.create_coding_file()
         self.details.create_testing_file()
 
@@ -269,7 +261,7 @@ class Codeforces(Base):
         res = []
         if not isinstance(elements, list):
             elements = elements.contents
-        for i, element in enumerate(elements):
+        for element in elements:
             if element.name == 'p':
                 res.append(element.text.strip())
             elif element.name == 'ul':
@@ -280,8 +272,6 @@ class Codeforces(Base):
                     res.append('{}. {}'.format(k + 1, li.text.strip()))
             else:
                 logger.warning('Unhandled element <%s> found.', element.name)
-            # if i < len(elements) - 1:
-            #     res.append('\n'
         return res
 
     def get_problem(self, url):
