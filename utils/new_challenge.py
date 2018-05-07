@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import argparse
 import logging
 import time
@@ -58,11 +59,13 @@ class Parser:
 
             f.write('{}\n\n'.format(self.pep8_lines(self.description)))
 
-            f.write('Input:\n\n')
-            f.write('{}\n\n'.format(self.pep8_lines(self.input_format)))
+            if self.input_format:
+                f.write('Input:\n\n')
+                f.write('{}\n\n'.format(self.pep8_lines(self.input_format)))
 
-            f.write('Output:\n\n')
-            f.write('{}\n\n'.format(self.pep8_lines(self.output_format)))
+            if self.output_format:
+                f.write('Output:\n\n')
+                f.write('{}\n\n'.format(self.pep8_lines(self.output_format)))
 
             f.write('"""\n')
 
@@ -175,6 +178,24 @@ class Base:
         self.details.create_coding_file()
         self.details.create_testing_file()
 
+    @staticmethod
+    def element_to_text(elements):
+        res = []
+        if not isinstance(elements, list):
+            elements = elements.contents
+        for element in elements:
+            if element.name == 'p':
+                res.append(element.text.strip())
+            elif element.name == 'ul':
+                for li in element.find_all('li'):
+                    res.append('- {}'.format(li.text.strip()))
+            elif element.name == 'ol':
+                for k, li in enumerate(element.find_all('li')):
+                    res.append('{}. {}'.format(k + 1, li.text.strip()))
+            else:
+                logger.warning('Unhandled element <%s> found.', element.name)
+        return res
+
 
 class HackerRank(Base):
     folder = 'hacker_rank'
@@ -214,38 +235,31 @@ class HackerRank(Base):
 
         return True
 
-    def get_problem(self, url):
-        driver = self.driver
-
-        # Gathering challenge information
-        driver.get(url)
-
-        details = {'url': url}
-
-        element = WebDriverWait(driver, 10).until(
+    def get_source(self, url):
+        self.driver.get(url)
+        time.sleep(5)
+        _ = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "hackdown-content")))
+        return self.driver.page_source
 
-        xpath = '//h2[contains(@class, "challenge")]'
-        details['name'] = driver.find_element_by_xpath(xpath).text
+    def parse(self, url):
+        source = self.get_source(url)
+        soup = bs4.BeautifulSoup(source, 'html.parser')
 
-        xpath = '//span[contains(@class, "difficulty")]'
-        details['difficulty'] = driver.find_element_by_xpath(xpath).text
+        details = self.details
+        details.url = url
 
-        xpath = '//div[@class="hackdown-content"]'
-        element = driver.find_element_by_xpath(xpath)
-        description = '\n\n'.join(pep8_lines(x) for x in element.text.split('\n'))
-        details['description'] = description
+        element = soup.find('h2', attrs={'class': re.compile('-name')})
+        name = element.get_text(strip=True)
+        filename = name.replace(' ', '_').replace('-', '_').lower()
+        details.name = name
+        details.filename = filename
 
-        # File creation
-        # TODO: Use regex to replace all invalid characters
-        filename = details['name'].replace(' ', '_').replace('-', '_').lower()
+        element = soup.find('span', attrs={'class': re.compile('difficulty')})
+        details.difficulty = element.text
 
-        details['filename'] = filename
-        details['challenge_file_path'] = f'{self.folder}/{filename}.py'
-        details['challenge_test_path'] = f'{self.folder}/tests/{filename}_test.py'
-
-        logger.debug('Challenge name: %s', details['name'])
-        logger.debug('Difficulty: %s', details['name'])
+        element = soup.find('div', attrs={'class': 'hackdown-content'})
+        details.description = self.element_to_text(element)
 
         return details
 
@@ -256,30 +270,15 @@ class Codeforces(Base):
     def login(self):
         pass  # Not needed for Codeforces
 
-    @staticmethod
-    def element_to_text(elements):
-        res = []
-        if not isinstance(elements, list):
-            elements = elements.contents
-        for element in elements:
-            if element.name == 'p':
-                res.append(element.text.strip())
-            elif element.name == 'ul':
-                for li in element.find_all('li'):
-                    res.append('- {}'.format(li.text.strip()))
-            elif element.name == 'ol':
-                for k, li in enumerate(element.find_all('li')):
-                    res.append('{}. {}'.format(k + 1, li.text.strip()))
-            else:
-                logger.warning('Unhandled element <%s> found.', element.name)
-        return res
+    def get_source(self, url):
+        return urlopen(url).read()
 
-    def get_problem(self, url):
+    def parse(self, url):
+        source = self.get_source(url)
+        soup = bs4.BeautifulSoup(source, 'html.parser')
+
         details = self.details
         details.url = url
-
-        html = urlopen(url).read()
-        soup = bs4.BeautifulSoup(html, 'html.parser')
 
         name = soup.find('div', attrs={'class': 'title'}).text
 
@@ -339,22 +338,25 @@ def main():
         print(f'{i}: {name}')
 
     try:
-        #choice, choice_cls = choices[int(input().strip())]
-        choice, choice_cls = choices[0]
+        choice, choice_cls = choices[int(input().strip())]
+        # choice, choice_cls = choices[0]
     except Exception as e:
         logger.error('Wrong input. %s.', e)
         raise
 
-    # Credentials
-    # print(f'Provide your credentials for {choice}:')
-    # username = input('Username:')
-    # password = getpass('Password:')
-    # username = 'mydarksoul69@gmail.com'  # TODO: Debug only
-    # password = 'l>^cFr8%D7Vtcyd6SM'  # TODO: Debug only
+    kwargs = {}
+    if choice in ['HackerRank']:
+        # Credentials
+        print(f'Provide your credentials for {choice}:')
+        # kwargs['username'] = input('Username:')
+        # kwargs['password'] = getpass('Password:')
+        kwargs['username'] = 'mydarksoul69@gmail.com'  # TODO: Debug only
+        kwargs['password'] = 'l>^cFr8%D7Vtcyd6SM'  # TODO: Debug only
 
-    # driver = webdriver.Firefox(executable_path=r'D:\geckodriver.exe')
+        driver = webdriver.Firefox(executable_path=r'D:\geckodriver.exe')
+        kwargs['driver'] = driver
 
-    #obj = choice_cls(username, password, driver)
+    # obj = choice_cls(username, password, driver)
 
     # try:
     #     obj.login()
@@ -366,13 +368,14 @@ def main():
     # Keep alive so we dont need to insert credentials every time.
     # while True:
     #     url = input('Challenge URL: ')
-    #     details = obj.get_problem(url)
+    #     details = obj.parse(url)
     #     obj.create_files(details)
     # driver.quit()
 
     url = input('Challenge URL: ')
-    obj = choice_cls()
-    details = obj.get_problem(url)
+    obj = choice_cls(**kwargs)
+    obj.login()
+    details = obj.parse(url)
     obj.create_files(details)
 
 
