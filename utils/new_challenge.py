@@ -43,7 +43,8 @@ class Parser:
 
     def set_file_blablabla(self):
         # FIXME: This doesnt go here. :p
-        self.description = self.pep8_lines(self.description)
+        #self.description = self.pep8_lines(self.description)
+        pass
 
     def create_coding_file(self):
         path = f'{self.folder}/{self.filename}.py'
@@ -60,8 +61,16 @@ class Parser:
 
             f.write(f'{self.url}\n\n')
 
-            descr = self.pep8_lines(self.description)
-            f.write(f'{descr}\n\n')
+            #descr = self.pep8_lines(self.description)
+            # f.write(f'{descr}\n\n')
+            
+            f.write('{}\n\n'.format(self.pep8_lines(self.description)))
+
+            f.write('Input:\n\n')
+            f.write('{}\n\n'.format(self.pep8_lines(self.input_format)))
+
+            f.write('Output:\n\n')
+            f.write('{}\n\n'.format(self.pep8_lines(self.output_format)))
 
             f.write('"""\n')
 
@@ -143,7 +152,7 @@ class Parser:
             line_width = 0
             lines = []
             line = []
-            for word in text.split():
+            for word in s.split():
                 line_width += 1 + len(word.strip())
                 if line_width > 79:
                     lines.append(line)
@@ -259,20 +268,23 @@ class Codeforces(Base):
 
     @staticmethod
     def element_to_text(elements):
-        text = ''
+        res = []
         if not isinstance(elements, list):
             elements = elements.contents
         for i, element in enumerate(elements):
             if element.name == 'p':
-                text += element.text.strip() + '\n'
+                res.append(element.text.strip())
             elif element.name == 'ul':
                 for li in element.find_all('li'):
-                    text += f'- {li.text.strip()}\n'
+                    res.append('- {}'.format(li.text.strip()))
+            elif element.name == 'ol':
+                for k, li in enumerate(element.find_all('li')):
+                    res.append('{}. {}'.format(k + 1, li.text.strip()))
             else:
                 logger.warning('Unhandled element <%s> found.', element.name)
-            if i < len(elements) - 1:
-                text += '\n'
-        return text
+            # if i < len(elements) - 1:
+            #     res.append('\n'
+        return res
 
     def get_problem(self, url):
         details = self.details
