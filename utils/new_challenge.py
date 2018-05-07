@@ -42,7 +42,7 @@ class Parser:
         self.challenge_test_path = None
 
     def create_coding_file(self):
-        path = f'{self.folder}/{self.filename}.py'
+        path = '{}/{}.py'.format(self.folder, self.filename)
 
         if os.path.isfile(path):
             logger.error('File %s already exists. Aborting.', path)
@@ -50,12 +50,12 @@ class Parser:
 
         with open(path, 'w', encoding='utf8') as f:
             # Docstring
-            f.write(f'"""{self.name}.\n\n')
+            f.write('"""{}.\n\n'.format(self.name))
 
             if self.difficulty:
-                f.write(f'- Difficulty: {self.difficulty}\n\n')
+                f.write('- Difficulty: {}\n\n'.format(self.difficulty))
 
-            f.write(f'{self.url}\n\n')
+            f.write('{}\n\n'.format(self.url))
 
             f.write('{}\n\n'.format(self.pep8_lines(self.description)))
 
@@ -101,10 +101,10 @@ class Parser:
             """
             self.text_block_to_file(main_code, f)
 
-        logger.info(f'Main file created successfully: {path}')
+        logger.info('Main file created successfully: %s', path)
 
     def create_testing_file(self):
-        path = f'{self.folder}/tests/{self.filename}_test.py'
+        path = '{}/tests/{}_test.py'.format(self.folder, self.filename)
 
         if os.path.isfile(path):
             logger.error('File %s already exists. Aborting.', path)
@@ -112,7 +112,8 @@ class Parser:
 
         with open(path, 'w', encoding='utf8') as f:
             f.write('from utils.test_utils import assert_time_limit\n')
-            f.write(f'from {self.folder}.{self.filename} import solve\n\n\n')
+            f.write('from {}.{} import solve\n\n\n'.format(
+                self.folder, self.filename))
 
             test_statement = """
                 def test_sample_test_case():
@@ -124,7 +125,7 @@ class Parser:
             f.write('\n\n')
 
             # Time limit test.
-            f.write(f'# Time limit: {self.time_limit}.\n')
+            f.write('# Time limit: {}.\n'.format(self.time_limit))
             test_statement = """
                 def test_time_limit():
                     args = []
@@ -132,7 +133,7 @@ class Parser:
             """
             self.text_block_to_file(test_statement, f)
 
-        logger.info(f'Test file created successfully: {path}')
+        logger.info('Test file created successfully: %s', path)
 
     @staticmethod
     def text_block_to_file(text_block, file_obj):
@@ -173,8 +174,11 @@ class Base:
         self.driver = driver
         self.details = Parser(self.folder)
 
+    def login(self):
+        # Override for any site which requires login.
+        return True
+
     def create_files(self, details):
-        # Challenge problem file
         self.details.create_coding_file()
         self.details.create_testing_file()
 
@@ -210,13 +214,14 @@ class HackerRank(Base):
             EC.presence_of_element_located((By.ID, "HackerRank-homepage")))
 
         try:
-            driver.find_element_by_xpath('//a[contains(@href, "/login")]').click()
-        except Exception as e:
-            print(e)
+            driver.find_element_by_xpath(
+                '//a[contains(@href, "/login")]').click()
+        except:
             time.sleep(3)
-            driver.find_element_by_xpath('//a[contains(@href, "/login")]').click()
+            driver.find_element_by_xpath(
+                '//a[contains(@href, "/login")]').click()
 
-        logger.info(f'Successfully logged in to __ with user {self.username}')
+        logger.info('Successfully logged in to __ with user %s', self.username)
 
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "login")))
@@ -266,9 +271,6 @@ class HackerRank(Base):
 
 class Codeforces(Base):
     folder = 'codeforces'
-
-    def login(self):
-        pass  # Not needed for Codeforces
 
     def get_source(self, url):
         return urlopen(url).read()
@@ -335,7 +337,7 @@ def main():
 
     print('Choose the website ...')  # TODO: Complete the statement.
     for i, (name, _) in enumerate(choices):
-        print(f'{i}: {name}')
+        print('{}: {}'.format(i, name))
 
     try:
         choice, choice_cls = choices[int(input().strip())]
@@ -347,7 +349,7 @@ def main():
     kwargs = {}
     if choice in ['HackerRank']:
         # Credentials
-        print(f'Provide your credentials for {choice}:')
+        print('Provide your credentials for {}:'.format(choice))
         # kwargs['username'] = input('Username:')
         # kwargs['password'] = getpass('Password:')
         kwargs['username'] = 'mydarksoul69@gmail.com'  # TODO: Debug only
