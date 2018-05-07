@@ -1,0 +1,4 @@
+selenium==3.11.*
+beautifulsoup4==4.6.*
+flake8==3.5.*
+hypothesis==3.56.*
