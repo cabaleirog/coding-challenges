@@ -11,10 +11,10 @@ def factorize(number):
     """Return the prime factors for a given number.
 
     Args:
-        number (int): Target number to factorize.
+        number (int): number to factorize.
 
     Returns:
-        List[int]: List of sorted prime factors.
+        List[int]: sorted prime factors.
 
     Examples:
         >>> factorize(20)
@@ -24,22 +24,22 @@ def factorize(number):
     """
     factors = set()
 
-    # Divide `number` until it becomes odd.
+    # divide `number` until it becomes odd
     if number > 1 and number % 2 == 0:
         factors.add(2)
         while number % 2 == 0:
             number //= 2
 
-    # Only check for odd factors now.
+    # only check odd numbers now
     while number > 1:
         for i in range(3, int(number ** 0.5) + 1, 2):
             if number % i == 0:
                 factors.add(i)
                 number //= i
                 break
-        else:  # no-break (Prime number).
+        else:  # no-break
             factors.add(number)
-            break  # We are done; the current value is a prime number.
+            break  # we are done; the current value is a prime number
 
     return sorted(factors)
 
