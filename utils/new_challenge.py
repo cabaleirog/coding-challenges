@@ -76,13 +76,18 @@ class Parser:
             logging_conf = """
                 import logging
 
+
+                fmt = '%(levelname)s - %(name)s (line:%(lineno)s) - %(message)s'
+                formatter = logging.Formatter(fmt)
+
                 ch = logging.StreamHandler()
                 ch.setLevel(logging.DEBUG)
+                ch.setFormatter(formatter)
 
-                logger = logging.getLogger()
+                logger = logging.getLogger('{0}')
                 logger.setLevel(logging.DEBUG)
                 logger.addHandler(ch)
-            """
+            """.format(self.filename)
             self.text_block_to_file(logging_conf, f)
             f.write('\n\n')
 
@@ -93,10 +98,14 @@ class Parser:
 
 
                 def main():
-                    for _ in range(int(input().strip())):
-                        args = input().strip().split()
-                        result = solve(*args)
-                        print(result)
+                    # Some common input types below, use as needed.
+                    s = input().strip()
+                    n = int(input().strip())
+                    n, m = map(int, input().strip().split())
+                    sequence = [int(x) for x in input().strip().split()]
+
+                    result = solve(None)
+                    print(result)
 
 
                 if __name__ == '__main__':
@@ -128,15 +137,27 @@ class Parser:
             f.write('\n\n')
 
             # Time limit test.
-            f.write('# Time limit: {}.\n'.format(self.time_limit))
+            #try:
+            time_limit_number = float(self.time_limit.split()[0])
             test_statement = """
                 def test_time_limit():
+                    # Time limit: {0}.
                     args = []
-                    assert_time_limit(0, solve, *args)
-            """
+                    assert_time_limit({1}, solve, *args)
+            """.format(self.time_limit, time_limit_number)
             self.text_block_to_file(test_statement, f)
 
         logger.info('Test file created successfully: %s', path)
+
+    def create_in_out_test_files(self):
+        prefix = '{}/tests/{}_'.format(self.folder, self.filename)
+        for i, (test_in, test_out) in enumerate(self.sample_tests):
+            with open('{}{}.in'.format(prefix, i), 'w') as f:
+                f.write(test_in)
+                logger.debug('File created %s', '{}{}.in'.format(prefix, i))
+            with open('{}{}.out'.format(prefix, i), 'w') as f:
+                f.write(test_out)
+                logger.debug('File created %s', '{}{}.out'.format(prefix, i))
 
     @staticmethod
     def text_block_to_file(text_block, file_obj):
@@ -350,6 +371,11 @@ class Codeforces(Base):
 
 
 def main():
+    parser = argparse.ArgumentParser(allow_abbrev=True)
+    parser.add_argument('--dry-run', nargs='?', const=True, type=bool)
+    parser.add_argument('--save-samples', nargs='?', const=True, type=bool)
+    args = parser.parse_args()
+    print(args)
     choices = (
         ('Codeforces', Codeforces),
         ('HackerRank', HackerRank))
@@ -397,7 +423,11 @@ def main():
     obj = choice_cls(**kwargs)
     obj.login()
     details = obj.parse(url)
-    obj.create_files(details)
+    if not args.dry_run:
+        obj.create_files(details)
+        if args.save_samples:
+            obj.details.create_in_out_test_files()
+
 
 
 if __name__ == '__main__':
