@@ -15,8 +15,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
+fmt = logging.Formatter('%(levelname)s - %(message)s')
+
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
+ch.setFormatter(fmt)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -198,6 +201,22 @@ class Base:
                     res.append('{}. {}'.format(k + 1, li.text.strip()))
             else:
                 logger.warning('Unhandled element <%s> found.', element.name)
+        
+        # Convert mathematical symbols inside the text.
+        for i in range(len(res)):
+            # Replace $$$x$$$ for `x`.
+            res[i] = re.sub(r'([$]{3})(.+?)([$]{3})', r'`\2`', res[i])
+            # Replace \le for <= sign.
+            res[i] = re.sub(r'((^|\W)\\le($|\W))', r'\2<=\3', res[i])
+            # Replace \cdot for multiplication sign (*).
+            res[i] = re.sub(r'((^|\W)\\cdot($|\W))', r'\2*\3', res[i])
+            # Replace \dots for multiplication 3 dots (...).
+            res[i] = re.sub(r'((^|\W)\\dots($|\W))', r'\2...\3', res[i])
+            # Replace \ne for not equal sign (!=)
+            res[i] = re.sub(r'((^|\W)\\ne($|\W))', r'\2!=\3', res[i])
+            # Replace backslace from min and max functions.
+            res[i] = re.sub(r'((^|\W)\\(min|max)(\())', r'\2\3\4', res[i])
+
         return res
 
 
@@ -343,8 +362,8 @@ def main():
         choice, choice_cls = choices[int(input().strip())]
         # choice, choice_cls = choices[0]
     except Exception as e:
-        logger.error('Wrong input. %s.', e)
-        raise
+        logger.error('Wrong Input - %s.', e)
+        sys.exit(1)
 
     kwargs = {}
     if choice in ['HackerRank']:
