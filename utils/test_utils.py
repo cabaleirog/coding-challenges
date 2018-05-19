@@ -1,5 +1,9 @@
-# TODO: Use multiprocessing module to kill a test running after time out limit.
 import time
+import multiprocessing
+
+
+class TimeLimitError(Exception):
+    pass
 
 
 def assert_time_limit(time_limit, func, *args, **kwargs):
@@ -15,11 +19,13 @@ def assert_time_limit(time_limit, func, *args, **kwargs):
         >>> import pytest
         >>> with pytest.raises(AssertionError):
         ...     assert_time_limit(0, lambda x: len(x), [2, 4, 6, 8])
+
     """
+    p = multiprocessing.Process(target=func, args=args)
     start = time.perf_counter()
-    _ = func(*args, **kwargs)
-    elapsed_time = time.perf_counter() - start
-    assert elapsed_time < time_limit
+    p.start()
+    check(p, start, time_limit)
+    return time.perf_counter() - start   
 
 
 def assert_time_limit_multitest(time_limit, func, *args, **kwargs):
@@ -42,15 +48,24 @@ def assert_time_limit_multitest(time_limit, func, *args, **kwargs):
         >>> assert_time_limit_multitest(0.8, gpc, *args)
         >>> with pytest.raises(AssertionError):
         ...     assert_time_limit_multitest(0.6, gpc, *args)
+
     """
     if len(args) <= 1:
         raise ValueError(
             'Multitest expects two or more positional arguments')
     start = time.perf_counter()
     for test_args in args:
-        _ = func(*test_args, **kwargs)
-    elapsed_time = time.perf_counter() - start
-    assert elapsed_time < time_limit
+        p = multiprocessing.Process(target=func, args=test_args)
+        p.start()
+        check(p, start, time_limit)
+    return time.perf_counter() - start
+
+
+def check(p, start, time_limit):
+    while p.is_alive():
+        if time.perf_counter() - start > time_limit:
+            p.terminate()
+            raise TimeLimitError('Terminated due to TLE.')
 
 
 if __name__ == '__main__':
