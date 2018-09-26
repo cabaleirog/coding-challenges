@@ -43,6 +43,7 @@ def climbing_leaderboard(scores, alice):
     Example:
         >>> list(climbing_leaderboard([20, 10, 10, 5], [5, 10, 15]))
         [3, 2, 2]
+
     """
     scores = sorted(set(scores))
     idx = 0

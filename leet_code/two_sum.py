@@ -9,6 +9,7 @@ one solution, and you may not use the same element twice.
 Example:
 Given nums = [2, 7, 11, 15], and target = 9,
 because nums[0] + nums[1] = 2 + 7 = 9, return [0, 1].
+
 """
 
 
@@ -16,12 +17,13 @@ def get_indices(array, target):
     """Find two numbers from `array` which add up to `target`.
 
     Args:
-        array (List[int]): The list of numbers
-        target (int): The target sum
+        array (List[int]): The list of numbers.
+        target (int): The target sum.
 
     Example:
         >>> get_indices([2, 7, 11, 15], 9)
         [0, 1]
+
     """
     complements = {}
     for idx, value in enumerate(array):

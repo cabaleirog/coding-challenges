@@ -19,15 +19,21 @@ in a way that each letter appears once. For example, the root of "aaaa", "aa",
 
 You have an ancient script in Aramic. What is the number of different objects
 mentioned in the script?
+
 """
 
 
-def count_objects(array):
+def solve(array):
     roots = {tuple(sorted(set(s))) for s in array}
     return len(roots)
 
 
-if __name__ == '__main__':
+def main():
     n = int(input().strip())
     array = input().strip().split()[:n]
-    print(count_objects(array))
+    result = solve(array)
+    print(result)
+
+
+if __name__ == '__main__':
+    main()

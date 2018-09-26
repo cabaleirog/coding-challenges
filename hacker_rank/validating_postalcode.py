@@ -23,6 +23,7 @@ Your task is to validate whether `P` is a valid postal code or not.
 Note:
     A score of 0 will be awarded for using 'if' conditions in your code.
     You have to pass all the testcases to get a positive score.
+
 """
 
 
@@ -34,6 +35,7 @@ def alt_rep_digits(code):
 
     Returns:
         int: Total number of alternating repetitive digits.
+
     """
     count = 0
     # Loop first by values with even indices, then the ones with odd indices.
@@ -52,6 +54,7 @@ def validate(postal_code):
 
     Returns:
         bool: True if the postal code is valid.
+
     """
     code = str(postal_code)
     count = alt_rep_digits(code)

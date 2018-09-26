@@ -22,6 +22,7 @@ Then g1 should not divide g2. This is necessary to avoid clashes.
 
 Can you help Jugnu form an indivisible team? Assume that for every g, Jugnu can
 always find a student with skill level g.
+
 """
 
 

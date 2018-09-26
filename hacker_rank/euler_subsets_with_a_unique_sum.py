@@ -36,6 +36,7 @@ example we find U(B,3) = {10,12,14,18,21,25,27,29} and sum(U(B,3)) = 156.
 Now consider the n-element set S = {s1,s2,...,sn}. S has nCm m-element
 subsets. Determine the sum of all integers which are the sum of exactly
 one of the m-element subsets of S, i.e. find sum(U(S,m)).
+
 """
 from itertools import combinations
 
@@ -50,6 +51,7 @@ def preprocess_data(numbers, size):
     Returns:
         tuple: A subset of the numbers array, a list of the numbers which have
             duplicates, and a list with groups which should be included
+
     """
     if size <= 2:
         return numbers, [], []
@@ -93,6 +95,7 @@ def get_sum(numbers, size, reduce_array=True):
     Example:
         >>> get_sum({1, 3, 6, 8, 10, 11}, 3)
         156
+
     """
     if reduce_array:
         processed_numbers, ignored_numbers, extra = preprocess_data(numbers, size)
@@ -116,7 +119,8 @@ def get_values(iterables, force_ignores=[]):
             exception of groups where all elements are in the exclude list.
 
     Returns:
-        tuple: Two sets, one with the sums, the other with the duplicated ones
+        tuple: Two sets, one with the sums, the other with the duplicated ones.
+
     """
     sums, ignores = set(), set()
     for iterable in iterables:

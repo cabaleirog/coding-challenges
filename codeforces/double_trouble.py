@@ -15,13 +15,11 @@ He is curious what is the minimum number of finger snaps he has to do in order
 to make sequence non-decreasing. Help him find this number or tell him that it
 is impossible.
 
-Input
-The first line of input contains the only integer n (1 ≤ n ≤ 100 000), the
+The first line of input contains the only integer n (1 <= n <= 100 000), the
 length of the sequence.
 
-The second line of input contains n integers a1, a2, ..., an (0 ≤ ai ≤ 10^6).
+The second line of input contains n integers a1, a2, ..., an (0 <= ai <= 10^6).
 
-Output
 If it is impossible to obtain a non-decreasing sequence of numbers by applying
 doubling operation, print -1.
 
@@ -53,8 +51,12 @@ def solve(array):
     return total
 
 
-if __name__ == '__main__':
+def main():
     _ = int(input().strip())
     array = [int(x) for x in input().strip().split()]
     result = solve(array)
     print(result)
+
+
+if __name__ == '__main__':
+    main()

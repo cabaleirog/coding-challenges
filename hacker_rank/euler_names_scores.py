@@ -14,6 +14,7 @@ which is worth 16 + 1 + 13 + 5 + 12 + 1 = 48, is the 5th name in the list. So,
 PAMELA would obtain a score of 5 * 48 = 240.
 
 You are given Q queries, each query is a name, you have to print the score.
+
 """
 
 

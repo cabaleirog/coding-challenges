@@ -17,6 +17,7 @@ their letters will have the same frequency if we remove 1 occurrence of c, but
 
 Given s, can you determine if it's valid or not? If it's valid, print YES on a
 new line; otherwise, print NO instead.
+
 """
 
 

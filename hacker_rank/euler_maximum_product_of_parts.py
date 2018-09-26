@@ -48,6 +48,7 @@ Steps taken to precompute:
 
 After completing those steps, we are able to return the result for each query
 in constant time.
+
 """
 import math
 
@@ -56,10 +57,11 @@ def precompute(largest_number):
     """Precompute the values of Sum(D(N)) until a certain value of N.
 
     Args:
-        largest_number (int): number until which we will precompute.
+        largest_number (int): Number until which we will precompute.
 
     Returns:
-        List[int]: values of Sum(D(N)) where N is represented by the index.
+        List[int]: Values of Sum(D(N)) where N is represented by the index.
+
     """
     optimal_splits = [round(n / math.e) for n in range(largest_number + 1)]
 
@@ -80,17 +82,18 @@ def number_ex_factors(number, factors):
     the given list, and return the multiplication of the remainig factors.
 
     Args:
-        number (int): the number from which the factors will be removed.
-        factors (List[int]): list of factors to remove.
+        number (int): The number from which the factors will be removed.
+        factors (List[int]): List of factors to remove.
 
     Returns:
-        int: the number after removing all the given factors.
+        int: The number after removing all the given factors.
 
     Examples:
         >>> number_ex_factors(20, [2])
         5
         >>> number_ex_factors(2 * 2 * 2 * 5, [2, 5])
         1
+
     """
     for factor in sorted(set(factors)):
         while number > 1 and number % factor == 0:
