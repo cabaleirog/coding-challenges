@@ -12,10 +12,10 @@ also must be deleted from the sequence. That step brings a[k] points to the
 player. Alex is a perfectionist, so he decided to get as many points as
 possible. Help him.
 
-The first line contains integer n (1 ≤ n ≤ 10^5) that shows how many numbers
+The first line contains integer n (1 <= n <= 10^5) that shows how many numbers
 are in Alex's sequence.
 
-The second line contains n integers a1, a2, ..., an (1 ≤ ai ≤ 10^5).
+The second line contains n integers a1, a2, ..., an (1 <= ai <= 10^5).
 
 Print a single integer - the maximum number of points that Alex can earn.
 

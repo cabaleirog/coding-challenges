@@ -13,6 +13,7 @@ N, find the sum of the even-valued terms.
 Examples:
     For N = 10, we have {2, 8}, sum is 10.
     For N = 100, we have {2, 8, 34}, sum is 44.
+
 """
 
 
@@ -20,7 +21,8 @@ def fibonacci():
     """A simple generator for the Fibonacci sequence.
 
     Yields:
-        int: The next term in the fibonacci sequence starting at 0.
+        int: The next term in the fibonacci sequence, starting at 0.
+
     """
     a, b = 0, 1
     while True:
@@ -33,6 +35,7 @@ def fibonacci_even_numbers(n):
 
     Returns:
         int: Total sum of even terms.
+
     """
     total = 0
     for term in fibonacci():

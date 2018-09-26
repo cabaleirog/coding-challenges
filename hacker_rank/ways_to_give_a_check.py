@@ -40,6 +40,7 @@ rank. Empty cells on the board are denoted by "#", while pieces are denoted by
 characters {K, Q, N, B, R, P} for White's pieces and {k, q, n, b, r, p} for
 Black's pieces, where K/k is the King, Q/q is a Queen, N/n is a Knight, B/b is
 a Bishop, R/r is a Rook, and P/p is a Pawn).
+
 """
 import os
 import string

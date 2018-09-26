@@ -17,6 +17,7 @@ Given a, determine if it is possible to do this task.
 
 Complete the function can_modify which takes in the integer array a and returns
 the string YES or NO denoting whether it is possible to do the task.
+
 """
 
 

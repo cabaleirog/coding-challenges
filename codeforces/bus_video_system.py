@@ -17,20 +17,20 @@ for each bus stop), where a[i] is the record for the bus stop `i`. The bus
 stops are numbered from 1 to n in chronological order.
 
 Determine the number of possible ways how many people could be in the bus
-before the first bus stop, if the bus has a capacity equals to `w` (that
-is, at any time in the bus there should be from 0 to w passengers inclusive).
+before the first bus stop, if the bus has a capacity equals to `w` (that is,
+at any time in the bus there should be from 0 to w passengers inclusive).
 
 """
 
 
 def solve(capacity, sequence):
     diff = 0
-    lb, ub = float('inf'), -float('inf')
+    upper, lower = float('-inf'), float('inf')
     for record in sequence:
         diff += record
-        ub = max(ub, diff)
-        lb = min(lb, diff)
-    return max(0, capacity - max(0, ub) + min(0, lb) + 1)
+        upper = max(upper, diff)
+        lower = min(lower, diff)
+    return max(0, capacity - max(0, upper) + min(0, lower) + 1)
 
 
 def main():

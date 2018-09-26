@@ -41,14 +41,15 @@ def day_of_the_programmer(year):
     """Return the formatted date of the programmer for a given year.
 
     Args:
-        year (int): The requested year
+        year (int): The requested year.
 
     Returns:
-        str: Formatted date
+        str: Formatted date.
 
     Example:
         >>> day_of_the_programmer(2000)
         '12.09.2000'
+
     """
     calendar = which_calendary(year)
     is_leap = is_leap_year(year, calendar)
@@ -70,11 +71,12 @@ def days_array(leap_year, calendar):
     """Get the number of days on each month.
 
     Args:
-        leap_year (bool): Is the requested year a leap year
-        calendar (int): Which calendar to use
+        leap_year (bool): Is the requested year a leap year.
+        calendar (int): Which calendar to use.
 
     Returns:
-        list[int]: An array containing the number of days on each month
+        list[int]: An array containing the number of days on each month.
+
     """
     months_with_31_days = [1, 3, 5, 7, 8, 10, 12]
     months_with_30_days = [4, 6, 9, 11]
@@ -96,13 +98,14 @@ def which_calendary(year):
     """Get the calendar used on a particular year.
 
     Args:
-        year (int): Requested year
+        year (int): Requested year.
 
     Raises:
         ValueError: If the year is out of the problem's specifications.
 
     Returns:
-        int: Calendar used on that year
+        int: Calendar used on that year.
+
     """
     if year >= 1700 and year <= 1917:
         return Calendar.JULIAN
@@ -118,11 +121,12 @@ def is_leap_year(year, calendar=Calendar.JULIAN):
     """Check if `year` is a leap year.
 
     Args:
-        year (int): Requested year
-        calendar (int, optional): Which alendar to use
+        year (int): Requested year.
+        calendar (int, optional): Which calendar to use.
 
     Returns:
-        bool: True if it is a leap year, False otherwise
+        bool: True if it is a leap year, False otherwise.
+
     """
     if calendar == Calendar.JULIAN:
         return year % 4 == 0

@@ -24,7 +24,7 @@ def solve(skills, quarrels):
     skills_mapping = defaultdict(list)
     for i, skill in enumerate(skills):
         skills_mapping[skill].append(i)
-    
+
     quarrels_mapping = defaultdict(int)
     for i, j in quarrels:
         if skills[i - 1] == skills[j - 1]:
@@ -49,7 +49,7 @@ def main():
     quarrels = [[int(x) for x in input().strip().split()] for _ in range(k)]
     result = solve(skills, quarrels)
     print(' '.join(map(str, result)))
-    
+
 
 if __name__ == '__main__':
     main()

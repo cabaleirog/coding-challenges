@@ -1,4 +1,4 @@
-"""Project Euler #1: Multiples of 3 and 5
+"""Project Euler #1: Multiples of 3 and 5.
 
 https://www.hackerrank.com/contests/projecteuler/challenges/euler001/problem
 
@@ -7,39 +7,15 @@ get 3, 5, 6 and 9. The sum of these multiples is 23.
 
 Find the sum of all the multiples of 3 or 5 below N.
 
-**Input Format**
+First line contains T that denotes the number of test cases. This is followed T
+lines, each containing an integer, N.
 
-	First line contains T that denotes the number of test cases. This is
-    followed T lines, each containing an integer, N.
+For each test case, print an integer that denotes the sum of all the multiples
+of 3 or 5 below N.
 
-**Constraints**
-
-	1 <= T <= 10^5
-	1 <= N <= 10^9
-
-**Output Format**
-
-	For each test case, print an integer that denotes the sum of all the
-    multiples of 3 or 5 below N.
-
-**Sample Input**
-
-    2
-    10
-    100
-
-**Sample Output**
-
-	23
-    2318
-
-**Explanation**
-
-	For N = 10, if we list all the natural numbers below 10 that are multiples
-    of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.
-    Similarly for N = 100, we get 2318.
 """
 from itertools import combinations
+
 
 def get_summation(upper_bound, factors):
     """Return the sum of all values divisables by a given set of values.
@@ -53,6 +29,7 @@ def get_summation(upper_bound, factors):
     Notes:
         We have to account for duplicates and remove those extra values
         Right shift has been used to avoid rounding issues on large numbers
+
     """
     upper_bound = int(upper_bound)  # Just in case the input is a float
     total = 0
@@ -60,14 +37,14 @@ def get_summation(upper_bound, factors):
     # Get the total sum for each factor
     for factor in factors:
         n = (upper_bound - 1) // factor
-        total += factor * n * (n + 1) >> 1 # Right shift 1 (Divided by 2)
+        total += factor * n * (n + 1) >> 1  # Right shift 1 (Divided by 2)
 
     # Subtract the sum for the overlapping values
     # TODO: Only works for the case of 2 factors. Implement a generic approach
     for pair in combinations(factors, 2):
         factor = pair[0] * pair[1]
         n = (upper_bound - 1) // factor
-        total -= factor * n * (n + 1) >> 1 # Right shift 1
+        total -= factor * n * (n + 1) >> 1  # Right shift 1
 
     return total
 
@@ -83,6 +60,7 @@ def get_sum(upper_bound, values, chunks=1):
 
     Returns:
         int: Sum of all values
+
     """
     last_divisible = highest_multiple(upper_bound, values)
     chunk_size = int(upper_bound / chunks)
@@ -102,6 +80,7 @@ def highest_multiple(upper_bound, values):
 
     Returns:
         dict: Mapping of factor and highest multiple
+
     """
     last_divisible = {}
     # Get the last number below the upper bound for each value
@@ -125,6 +104,7 @@ def multiples(factors_array, highest_multiples, lowest=1, chunk_size=None):
 
     Yields:
         int: Values which are divisible by factor
+
     """
     if chunk_size:
         lowest = max(highest_multiples.values()) - chunk_size
@@ -154,12 +134,16 @@ def multiples(factors_array, highest_multiples, lowest=1, chunk_size=None):
             # yielded will be cleaned completely for the smallest factor
             yielded[min(factors)] = {}
             for n in [x for x in yielded.keys() if x != min(factors)]:
-                yielded[n] = {k: v for k, v in yielded[n].items() if v < cut_off}
+                yielded[n] = {
+                    k: v
+                    for k, v in yielded[n].items() if v < cut_off
+                }
 
     highest_multiples = highest_multiple(lowest, factors_array)
     if max(highest_multiples.values()) <= 1:
         return
-    yield from multiples(factors_array, highest_multiples, chunk_size=chunk_size)
+    yield from multiples(
+        factors_array, highest_multiples, chunk_size=chunk_size)
 
 
 if __name__ == '__main__':
